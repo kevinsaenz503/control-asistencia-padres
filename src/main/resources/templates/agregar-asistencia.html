@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Registrar asistencia | Asistencia</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-principal: #1769c2;
+            --color-principal-hover: #1259a5;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef4f9;
+            color: #102a43;
+            min-height: 100vh;
+        }
+
+        /* =====================================================
+           ESTRUCTURA
+           ===================================================== */
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =====================================================
+           SIDEBAR
+           ===================================================== */
+
+        .sidebar {
+            width: 250px;
+            background: var(--color-principal);
+            color: white;
+            padding: 30px 10px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 20px 32px;
+        }
+
+        .logo-icon {
+            font-size: 27px;
+        }
+
+        .logo-text {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .menu a {
+            color: white;
+            text-decoration: none;
+            padding: 13px 18px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .menu a:hover {
+            background: rgba(255,255,255,0.13);
+        }
+
+        .menu a.active {
+            background: #42a5f5;
+        }
+
+        .menu-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.25);
+            padding-top: 18px;
+        }
+
+        .user-active {
+            font-size: 13px;
+            padding: 0 12px 12px;
+        }
+
+        .logout {
+            width: 100%;
+            border: none;
+            background: #ef334c;
+            color: white;
+            padding: 12px;
+            border-radius: 9px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .logout:hover {
+            background: #d9273e;
+        }
+
+        /* =====================================================
+           CONTENIDO
+           ===================================================== */
+
+        .content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding: 28px 32px;
+        }
+
+        /* =====================================================
+           HEADER
+           ===================================================== */
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            color: #607d98;
+            font-size: 14px;
+        }
+
+        .header-badge {
+            background: white;
+            color: var(--color-principal);
+            padding: 13px 20px;
+            border-radius: 11px;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.07);
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* =====================================================
+           FORMULARIO
+           ===================================================== */
+
+        .form-container {
+            max-width: 820px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 28px 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+        }
+
+        .form-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .form-title-icon {
+            width: 40px;
+            height: 40px;
+            background: #dff0ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+        }
+
+        .form-title h2 {
+            font-size: 20px;
+        }
+
+        .form-subtitle {
+            margin-left: 52px;
+            color: #607d98;
+            font-size: 13px;
+            margin-bottom: 27px;
+        }
+
+        /* =====================================================
+           CAMPOS
+           ===================================================== */
+
+        .form-group {
+            margin-bottom: 19px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 7px;
+            color: #243b53;
+        }
+
+        .required {
+            color: #ef334c;
+        }
+
+        select,
+        input[type="time"],
+        input[type="text"] {
+            width: 100%;
+            height: 42px;
+            border: 1px solid #c8d5e2;
+            border-radius: 8px;
+            padding: 0 13px;
+            font-size: 13px;
+            color: #243b53;
+            background: white;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        select:focus,
+        input[type="time"]:focus,
+        input[type="text"]:focus {
+            border-color: var(--color-principal);
+            box-shadow: 0 0 0 3px rgba(23,105,194,0.10);
+        }
+
+        .help-text {
+            display: block;
+            margin-top: 6px;
+            color: #78909c;
+            font-size: 11px;
+        }
+
+        /* =====================================================
+           INFORMACIÓN DEL PADRE
+           ===================================================== */
+
+        .padre-info {
+            display: none;
+            margin-top: 10px;
+            padding: 13px 15px;
+            background: #f4f8fc;
+            border: 1px solid #dce7f0;
+            border-radius: 9px;
+        }
+
+        .padre-info.visible {
+            display: block;
+        }
+
+        .padre-info-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--color-principal);
+            margin-bottom: 8px;
+        }
+
+        .padre-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px 18px;
+        }
+
+        .padre-info-item {
+            font-size: 12px;
+            color: #607d98;
+        }
+
+        .padre-info-item strong {
+            color: #243b53;
+        }
+
+        /* =====================================================
+           ESTADOS
+           ===================================================== */
+
+        .estado-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 9px;
+        }
+
+        .estado-option {
+            position: relative;
+        }
+
+        .estado-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .estado-option label {
+            height: 43px;
+            border: 1px solid #c8d5e2;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            color: #34495e;
+            transition: 0.2s;
+            margin: 0;
+        }
+
+        .estado-option label:hover {
+            border-color: var(--color-principal);
+            background: #f5f9fd;
+        }
+
+        .estado-option input:checked + label {
+            background: var(--color-principal);
+            border-color: var(--color-principal);
+            color: white;
+            font-weight: bold;
+        }
+
+        /* =====================================================
+           DOS COLUMNAS
+           ===================================================== */
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 17px;
+        }
+
+        /* =====================================================
+           FIRMA DIGITAL
+           ===================================================== */
+
+        .firma-container {
+            position: relative;
+        }
+
+        .firma-input {
+            height: 48px !important;
+            font-size: 14px !important;
+            padding-left: 15px !important;
+            border: 1px solid #b9c9d8 !important;
+        }
+
+        .firma-input::placeholder {
+            color: #9aaabd;
+        }
+
+        .firma-label-info {
+            margin-top: 6px;
+            font-size: 11px;
+            color: #78909c;
+        }
+
+        /* =====================================================
+           BOTONES
+           ===================================================== */
+
+        .form-actions {
+            border-top: 1px solid #e1e8ee;
+            margin-top: 25px;
+            padding-top: 18px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 11px 18px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-cancel {
+            background: #e8eef3;
+            color: #243b53;
+        }
+
+        .btn-cancel:hover {
+            background: #dbe4eb;
+        }
+
+        .btn-save {
+            background: var(--color-principal);
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: var(--color-principal-hover);
+        }
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 210px;
+            }
+
+            .content {
+                margin-left: 210px;
+                width: calc(100% - 210px);
+            }
+
+        }
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+            }
+
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+
+            .layout {
+                display: block;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .form-container {
+                padding: 22px;
+            }
+
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .estado-group {
+                grid-template-columns: 1fr;
+            }
+
+            .padre-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="layout">
+
+
+    <!-- =====================================================
+         MENÚ LATERAL
+         ===================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                📚
+            </div>
+
+            <div class="logo-text"
+                 data-config="nombre-sistema">
+                Asistencia
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <a href="/home">
+
+                <span class="menu-icon">🏠</span>
+
+                Inicio
+
+            </a>
+
+
+            <a href="/asistencia">
+
+                <span class="menu-icon">📋</span>
+
+                Asistencias
+
+            </a>
+
+
+            <a href="/asistencia/agregar"
+               class="active">
+
+                <span class="menu-icon">📝</span>
+
+                Agregar asistencia
+
+            </a>
+
+
+            <a href="/padres">
+
+                <span class="menu-icon">👨‍👩‍👧</span>
+
+                Padres
+
+            </a>
+
+
+            <a href="/reuniones">
+
+                <span class="menu-icon">🗓️</span>
+
+                Reuniones
+
+            </a>
+
+
+            <a href="/usuarios">
+
+                <span class="menu-icon">👥</span>
+
+                Usuarios
+
+            </a>
+
+
+            <a href="/configuracion">
+
+                <span class="menu-icon">⚙️</span>
+
+                Configuración
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="user-active">
+
+                👤 Usuario activo:
+
+                <strong th:text="${username}">
+                    admin
+                </strong>
+
+            </div>
+
+
+            <form method="post"
+                  action="/logout">
+
+                <button type="submit"
+                        class="logout">
+
+                    🚪 Cerrar sesión
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTENIDO
+         ===================================================== -->
+
+    <main class="content">
+
+
+        <div class="header">
+
+            <div>
+
+                <h1>
+                    Registrar asistencia
+                </h1>
+
+                <p>
+                    Registra la asistencia de los padres a una reunión.
+                </p>
+
+            </div>
+
+
+            <div class="header-badge">
+
+                📋 Control de asistencia
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FORMULARIO
+             ================================================= -->
+
+        <div class="form-container">
+
+
+            <div class="form-title">
+
+                <div class="form-title-icon">
+                    📝
+                </div>
+
+                <h2>
+                    Datos de la asistencia
+                </h2>
+
+            </div>
+
+
+            <p class="form-subtitle">
+
+                Complete los datos del registro.
+
+            </p>
+
+
+            <form th:action="@{/asistencia/guardar}"
+                  th:object="${asistencia}"
+                  method="post">
+
+
+                <!-- =========================================
+                     PADRE
+                     ========================================= -->
+
+                <div class="form-group">
+
+                    <label for="idPadre">
+
+                        Padre o responsable
+
+                        <span class="required">*</span>
+
+                    </label>
+
+
+                    <select id="idPadre"
+                            th:field="*{idPadre}"
+                            required>
+
+                        <option value="">
+
+                            Seleccione un padre
+
+                        </option>
+
+
+                        <option
+                            th:each="padre : ${padres}"
+                            th:value="${padre.idPadre}"
+
+                            th:attr="
+                                data-nombre=${padre.nombreCompleto},
+                                data-dui=${padre.dui},
+                                data-estudiante=${padre.nombreEstudiante},
+                                data-seccion=${padre.gradoSeccion}
+                            "
+
+                            th:text="${padre.nombreCompleto
+                                + ' | DUI: '
+                                + padre.dui
+                                + ' | Estudiante: '
+                                + padre.nombreEstudiante
+                                + ' | Sección: '
+                                + padre.gradoSeccion}">
+
+                        </option>
+
+                    </select>
+
+
+                    <small class="help-text">
+
+                        Seleccione el padre que asistió a la reunión.
+
+                    </small>
+
+
+                    <!-- INFORMACIÓN DEL PADRE -->
+
+                    <div id="padreInfo"
+                         class="padre-info">
+
+                        <div class="padre-info-title">
+
+                            👤 Información del padre seleccionado
+
+                        </div>
+
+
+                        <div class="padre-info-grid">
+
+
+                            <div class="padre-info-item">
+
+                                <strong>
+                                    Nombre:
+                                </strong>
+
+                                <span id="infoNombre">
+                                    -
+                                </span>
+
+                            </div>
+
+
+                            <div class="padre-info-item">
+
+                                <strong>
+                                    DUI:
+                                </strong>
+
+                                <span id="infoDui">
+                                    -
+                                </span>
+
+                            </div>
+
+
+                            <div class="padre-info-item">
+
+                                <strong>
+                                    Estudiante:
+                                </strong>
+
+                                <span id="infoEstudiante">
+                                    -
+                                </span>
+
+                            </div>
+
+
+                            <div class="padre-info-item">
+
+                                <strong>
+                                    Grado / Sección:
+                                </strong>
+
+                                <span id="infoSeccion">
+                                    -
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     REUNIÓN
+                     ========================================= -->
+
+                <div class="form-group">
+
+                    <label for="idReunion">
+
+                        Reunión
+
+                        <span class="required">*</span>
+
+                    </label>
+
+
+                    <select id="idReunion"
+                            th:field="*{idReunion}"
+                            required>
+
+                        <option value="">
+
+                            Seleccione una reunión
+
+                        </option>
+
+
+                        <option
+                            th:each="reunion : ${reuniones}"
+                            th:value="${reunion.idReunion}"
+
+                            th:text="${reunion.fecha
+                                + ' - '
+                                + reunion.tipoReunion}">
+
+                        </option>
+
+                    </select>
+
+
+                    <small class="help-text">
+
+                        Seleccione la reunión correspondiente.
+
+                    </small>
+
+                </div>
+
+
+                <!-- =========================================
+                     ESTADO
+                     ========================================= -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Estado de asistencia
+
+                        <span class="required">*</span>
+
+                    </label>
+
+
+                    <div class="estado-group">
+
+
+                        <div class="estado-option">
+
+                            <input
+                                type="radio"
+                                id="estadoAsistio"
+                                th:field="*{estado}"
+                                value="Asistió"
+                                checked>
+
+                            <label for="estadoAsistio">
+
+                                ✓ Asistió
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="estado-option">
+
+                            <input
+                                type="radio"
+                                id="estadoNoAsistio"
+                                th:field="*{estado}"
+                                value="No asistió">
+
+                            <label for="estadoNoAsistio">
+
+                                ✕ No asistió
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="estado-option">
+
+                            <input
+                                type="radio"
+                                id="estadoJustificado"
+                                th:field="*{estado}"
+                                value="Justificado">
+
+                            <label for="estadoJustificado">
+
+                                ¡ Justificado
+
+                            </label>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <small class="help-text">
+
+                        Seleccione el estado correspondiente.
+
+                    </small>
+
+                </div>
+
+
+                <!-- =========================================
+                     HORA + FIRMA
+                     ========================================= -->
+
+                <div class="two-columns">
+
+
+                    <!-- HORA -->
+
+                    <div class="form-group">
+
+                        <label for="horaLlegada">
+
+                            Hora de llegada
+
+                        </label>
+
+
+                        <input
+                            type="time"
+                            id="horaLlegada"
+                            th:field="*{horaLlegada}">
+
+
+                        <small class="help-text">
+
+                            Puede dejarlo vacío si el padre no asistió.
+
+                        </small>
+
+                    </div>
+
+
+                    <!-- FIRMA -->
+
+                    <div class="form-group">
+
+                        <label for="firmaDigital">
+
+                            Firma digital
+
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="firmaDigital"
+                            th:field="*{firmaDigital}"
+                            class="firma-input"
+                            placeholder="Escriba la firma o referencia">
+
+
+                        <small class="firma-label-info">
+
+                            Escriba el nombre, firma o referencia digital del padre.
+
+                        </small>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- =========================================
+                     BOTONES
+                     ========================================= -->
+
+                <div class="form-actions">
+
+
+                    <a href="/asistencia"
+                       class="btn btn-cancel">
+
+                        ← Cancelar
+
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-save">
+
+                        💾 Guardar asistencia
+
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+     ========================================================= -->
+
+<script src="/js/configuracion-global.js"></script>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        const padreSelect =
+            document.getElementById("idPadre");
+
+
+        const padreInfo =
+            document.getElementById("padreInfo");
+
+
+        const infoNombre =
+            document.getElementById("infoNombre");
+
+
+        const infoDui =
+            document.getElementById("infoDui");
+
+
+        const infoEstudiante =
+            document.getElementById("infoEstudiante");
+
+
+        const infoSeccion =
+            document.getElementById("infoSeccion");
+
+
+        /* =================================================
+           MOSTRAR INFORMACIÓN DEL PADRE
+           ================================================= */
+
+        function mostrarPadre() {
+
+
+            if (!padreSelect) {
+                return;
+            }
+
+
+            const opcion =
+                padreSelect.options[
+                    padreSelect.selectedIndex
+                ];
+
+
+            if (
+                !opcion ||
+                !opcion.value
+            ) {
+
+                padreInfo.classList.remove(
+                    "visible"
+                );
+
+                infoNombre.textContent = "-";
+                infoDui.textContent = "-";
+                infoEstudiante.textContent = "-";
+                infoSeccion.textContent = "-";
+
+                return;
+
+            }
+
+
+            infoNombre.textContent =
+                opcion.dataset.nombre || "-";
+
+
+            infoDui.textContent =
+                opcion.dataset.dui || "-";
+
+
+            infoEstudiante.textContent =
+                opcion.dataset.estudiante || "-";
+
+
+            infoSeccion.textContent =
+                opcion.dataset.seccion || "-";
+
+
+            padreInfo.classList.add(
+                "visible"
+            );
+
+        }
+
+
+        if (padreSelect) {
+
+            padreSelect.addEventListener(
+                "change",
+                mostrarPadre
+            );
+
+            mostrarPadre();
+
+        }
+
+
+        /* =================================================
+           CONTROL DE HORA SEGÚN ESTADO
+           ================================================= */
+
+        const estados =
+            document.querySelectorAll(
+                'input[name="estado"]'
+            );
+
+
+        const horaLlegada =
+            document.getElementById(
+                "horaLlegada"
+            );
+
+
+        function controlarHora() {
+
+            const seleccionado =
+                document.querySelector(
+                    'input[name="estado"]:checked'
+                );
+
+
+            if (!seleccionado) {
+                return;
+            }
+
+
+            const estado =
+                seleccionado.value
+                    .toLowerCase()
+                    .trim();
+
+
+            if (
+                estado === "no asistió" ||
+                estado === "no asistio"
+            ) {
+
+                horaLlegada.value = "";
+
+                horaLlegada.disabled = true;
+
+                horaLlegada.style.background =
+                    "#f1f4f7";
+
+            } else {
+
+                horaLlegada.disabled = false;
+
+                horaLlegada.style.background =
+                    "white";
+
+            }
+
+        }
+
+
+        estados.forEach(
+            function (radio) {
+
+                radio.addEventListener(
+                    "change",
+                    controlarHora
+                );
+
+            }
+        );
+
+
+        controlarHora();
+
+    });
+
+</script>
+
+
+</body>
+
+</html>

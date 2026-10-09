@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Agregar reunión | Asistencia</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-principal: #1769c2;
+            --color-principal-hover: #1259a5;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef4f9;
+            color: #102a43;
+            min-height: 100vh;
+        }
+
+        /* =====================================================
+           ESTRUCTURA
+           ===================================================== */
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =====================================================
+           SIDEBAR
+           ===================================================== */
+
+        .sidebar {
+            width: 250px;
+            background: var(--color-principal);
+            color: white;
+            padding: 30px 10px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 20px 32px;
+        }
+
+        .logo-icon {
+            font-size: 27px;
+        }
+
+        .logo-text {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .menu a {
+            color: white;
+            text-decoration: none;
+            padding: 13px 18px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .menu a:hover {
+            background: rgba(255,255,255,0.13);
+        }
+
+        .menu a.active {
+            background: #42a5f5;
+        }
+
+        .menu-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* =====================================================
+           PARTE INFERIOR DEL MENÚ
+           ===================================================== */
+
+        .sidebar-bottom {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.25);
+            padding-top: 18px;
+        }
+
+        .user-active {
+            font-size: 13px;
+            padding: 0 12px 12px;
+        }
+
+        .logout {
+            width: 100%;
+            border: none;
+            background: #ef334c;
+            color: white;
+            padding: 12px;
+            border-radius: 9px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .logout:hover {
+            background: #d9273e;
+        }
+
+        /* =====================================================
+           CONTENIDO
+           ===================================================== */
+
+        .content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding: 40px 34px;
+        }
+
+        /* =====================================================
+           ENCABEZADO
+           ===================================================== */
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 27px;
+        }
+
+        .header h1 {
+            font-size: 29px;
+            margin-bottom: 7px;
+            color: #102a43;
+        }
+
+        .header p {
+            color: #607d98;
+            font-size: 14px;
+        }
+
+        .header-badge {
+            background: white;
+            color: var(--color-principal);
+            padding: 14px 20px;
+            border-radius: 11px;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.07);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* =====================================================
+           FORMULARIO
+           ===================================================== */
+
+        .form-container {
+            max-width: 900px;
+            background: white;
+            border-radius: 16px;
+            padding: 28px 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+        }
+
+        /* =====================================================
+           AVISO
+           ===================================================== */
+
+        .info-box {
+            background: #f7fafc;
+            border: 1px solid #d8e3ec;
+            border-radius: 9px;
+            padding: 13px;
+            margin-bottom: 25px;
+            color: #607d98;
+            font-size: 13px;
+        }
+
+        .info-box strong {
+            color: #243b53;
+        }
+
+        /* =====================================================
+           CAMPOS
+           ===================================================== */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 5px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            color: #243b53;
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #ef334c;
+        }
+
+        input[type="date"],
+        input[type="text"] {
+            width: 100%;
+            height: 48px;
+            padding: 0 14px;
+            border: 1px solid #c7d5e2;
+            border-radius: 9px;
+            background: white;
+            color: #243b53;
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input[type="date"]:focus,
+        input[type="text"]:focus {
+            border-color: var(--color-principal);
+            box-shadow: 0 0 0 3px rgba(23,105,194,0.10);
+        }
+
+        input::placeholder {
+            color: #9aaabd;
+        }
+
+        .help-text {
+            display: block;
+            margin-top: 7px;
+            font-size: 11px;
+            color: #78909c;
+        }
+
+        /* =====================================================
+           TIPO DE REUNIÓN
+           ===================================================== */
+
+        .tipo-reunion-input {
+            font-size: 14px !important;
+        }
+
+        .tipo-ejemplos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: 10px;
+        }
+
+        .ejemplo {
+            background: #edf5fc;
+            color: var(--color-principal);
+            border: 1px solid #d7e8f6;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .ejemplo:hover {
+            background: var(--color-principal);
+            color: white;
+        }
+
+        /* =====================================================
+           ACCIONES
+           ===================================================== */
+
+        .form-actions {
+            border-top: 1px solid #e1e8ee;
+            margin-top: 28px;
+            padding-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 9px;
+            padding: 12px 20px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-cancel {
+            background: #687b91;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #526579;
+        }
+
+        .btn-save {
+            background: var(--color-principal);
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: var(--color-principal-hover);
+        }
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 215px;
+            }
+
+            .content {
+                margin-left: 215px;
+                width: calc(100% - 215px);
+            }
+
+        }
+
+        @media (max-width: 700px) {
+
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                min-height: auto;
+            }
+
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 22px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .form-container {
+                padding: 22px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="layout">
+
+
+    <!-- =====================================================
+         MENÚ LATERAL
+         ===================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                📚
+            </div>
+
+            <div class="logo-text"
+                 data-config="nombre-sistema">
+
+                Asistencia
+
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+
+            <!-- INICIO -->
+
+            <a href="/home">
+
+                <span class="menu-icon">
+                    🏠
+                </span>
+
+                Inicio
+
+            </a>
+
+
+            <!-- ASISTENCIAS -->
+
+            <a href="/asistencia">
+
+                <span class="menu-icon">
+                    📋
+                </span>
+
+                Asistencias
+
+            </a>
+
+
+            <!-- AGREGAR ASISTENCIA -->
+
+            <a href="/asistencia/agregar">
+
+                <span class="menu-icon">
+                    📝
+                </span>
+
+                Agregar asistencia
+
+            </a>
+
+
+            <!-- PADRES -->
+
+            <a href="/padres">
+
+                <span class="menu-icon">
+                    👨‍👩‍👧
+                </span>
+
+                Padres
+
+            </a>
+
+
+            <!-- REUNIONES -->
+
+            <a href="/reuniones"
+               class="active">
+
+                <span class="menu-icon">
+                    🗓️
+                </span>
+
+                Reuniones
+
+            </a>
+
+
+            <!-- USUARIOS -->
+
+            <a href="/usuarios">
+
+                <span class="menu-icon">
+                    👥
+                </span>
+
+                Usuarios
+
+            </a>
+
+
+            <!-- CONFIGURACIÓN -->
+
+            <a href="/configuracion">
+
+                <span class="menu-icon">
+                    ⚙️
+                </span>
+
+                Configuración
+
+            </a>
+
+
+        </nav>
+
+
+        <!-- =================================================
+             USUARIO
+             ================================================= -->
+
+        <div class="sidebar-bottom">
+
+            <div class="user-active">
+
+                👤 Usuario activo:
+
+                <strong th:text="${username}">
+                    admin
+                </strong>
+
+            </div>
+
+
+            <form method="post"
+                  action="/logout">
+
+                <button type="submit"
+                        class="logout">
+
+                    🚪 Cerrar sesión
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTENIDO
+         ===================================================== -->
+
+    <main class="content">
+
+
+        <!-- =================================================
+             ENCABEZADO
+             ================================================= -->
+
+        <div class="header">
+
+            <div>
+
+                <h1>
+                    Agregar reunión
+                </h1>
+
+                <p>
+                    Registra la fecha y el tipo de reunión.
+                </p>
+
+            </div>
+
+
+            <div class="header-badge">
+
+                🗓️ Datos de reunión
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FORMULARIO
+             ================================================= -->
+
+        <div class="form-container">
+
+
+            <div class="info-box">
+
+                Los datos se guardarán directamente en la tabla
+                <strong>reuniones</strong> de PostgreSQL.
+
+            </div>
+
+
+            <form
+                th:action="@{/reuniones/guardar}"
+                th:object="${reunion}"
+                method="post">
+
+
+                <div class="form-grid">
+
+
+                    <!-- =====================================
+                         FECHA
+                         ===================================== -->
+
+                    <div class="form-group">
+
+                        <label for="fecha">
+
+                            Fecha
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            type="date"
+                            id="fecha"
+                            th:field="*{fecha}"
+                            required>
+
+
+                        <small class="help-text">
+
+                            Seleccione la fecha en que se realizará la reunión.
+
+                        </small>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         TIPO DE REUNIÓN
+                         ===================================== -->
+
+                    <div class="form-group">
+
+                        <label for="tipoReunion">
+
+                            Tipo de reunión
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="tipoReunion"
+                            th:field="*{tipoReunion}"
+                            class="tipo-reunion-input"
+                            placeholder="Ejemplo: Reunión General"
+                            maxlength="100"
+                            required>
+
+
+                        <small class="help-text">
+
+                            Escriba el tipo o motivo de la reunión.
+
+                        </small>
+
+
+                        <!-- EJEMPLOS -->
+
+                        <div class="tipo-ejemplos">
+
+
+                            <span class="ejemplo"
+                                  data-tipo="Reunión General">
+
+                                Reunión General
+
+                            </span>
+
+
+                            <span class="ejemplo"
+                                  data-tipo="Reunión Extraordinaria">
+
+                                Extraordinaria
+
+                            </span>
+
+
+                            <span class="ejemplo"
+                                  data-tipo="Entrega de Notas">
+
+                                Entrega de Notas
+
+                            </span>
+
+
+                            <span class="ejemplo"
+                                  data-tipo="Rendición de cuentas">
+
+                                Rendición de cuentas
+
+                            </span>
+
+
+                            <span class="ejemplo"
+                                  data-tipo="Escuela para padres">
+
+                                Escuela para padres
+
+                            </span>
+
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- =========================================
+                     BOTONES
+                     ========================================= -->
+
+                <div class="form-actions">
+
+
+                    <a href="/reuniones"
+                       class="btn btn-cancel">
+
+                        ← Cancelar
+
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-save">
+
+                        💾 Guardar reunión
+
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     CONFIGURACIÓN GLOBAL
+     ========================================================= -->
+
+<script src="/js/configuracion-global.js"></script>
+
+
+<!-- =========================================================
+     JAVASCRIPT DE LA PÁGINA
+     ========================================================= -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        const tipoReunion =
+            document.getElementById(
+                "tipoReunion"
+            );
+
+
+        const ejemplos =
+            document.querySelectorAll(
+                ".ejemplo"
+            );
+
+
+        /* ================================================
+           BOTONES DE EJEMPLO
+           ================================================ */
+
+        ejemplos.forEach(
+            function (ejemplo) {
+
+                ejemplo.addEventListener(
+                    "click",
+                    function () {
+
+                        const tipo =
+                            this.dataset.tipo;
+
+
+                        if (tipoReunion) {
+
+                            tipoReunion.value =
+                                tipo;
+
+                            tipoReunion.focus();
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        /* ================================================
+           FECHA ACTUAL COMO SUGERENCIA
+           ================================================ */
+
+        const fecha =
+            document.getElementById(
+                "fecha"
+            );
+
+
+        if (
+            fecha &&
+            !fecha.value
+        ) {
+
+            const hoy =
+                new Date();
+
+
+            const año =
+                hoy.getFullYear();
+
+
+            const mes =
+                String(
+                    hoy.getMonth() + 1
+                ).padStart(2, "0");
+
+
+            const dia =
+                String(
+                    hoy.getDate()
+                ).padStart(2, "0");
+
+
+            fecha.value =
+                `${año}-${mes}-${dia}`;
+
+        }
+
+    }
+);
+
+</script>
+
+
+<script src="/js/configuracion-global.js"></script>
+</body>
+
+</html>
