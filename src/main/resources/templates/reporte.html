@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes | Control de Asistencia</title>
+
+    <style>
+        :root {
+            --color-principal: #1769c2;
+            --color-principal-hover: #105aa9;
+            --pagina: #eef3f8;
+            --panel: #ffffff;
+            --texto: #172033;
+            --secundario: #64748b;
+            --borde: #e5eaf0;
+            --tabla: #eaf4fc;
+            --hover: #f8fafc;
+            --entrada: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--pagina);
+            color: var(--texto);
+            min-height: 100vh;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 250px;
+            background: var(--color-principal);
+            color: white;
+            padding: 24px 15px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 18px 32px;
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .menu a {
+            color: white;
+            text-decoration: none;
+            padding: 13px 16px;
+            border-radius: 10px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .menu a:hover {
+            background: rgba(255,255,255,0.14);
+        }
+
+        .menu a.active {
+            background: rgba(255,255,255,0.30);
+        }
+
+        .bottom {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,.25);
+            padding-top: 15px;
+        }
+
+        .active-user {
+            font-size: 13px;
+            padding: 0 10px 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .logout {
+            width: 100%;
+            border: 0;
+            background: #e63950;
+            color: white;
+            padding: 12px;
+            border-radius: 9px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .main {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding: 34px;
+            min-width: 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 30px;
+        }
+
+        .header p,
+        .description {
+            color: var(--secundario);
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .system {
+            background: var(--panel);
+            color: var(--color-principal);
+            padding: 12px 17px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        .panel {
+            background: var(--panel);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.06);
+            margin-bottom: 22px;
+        }
+
+        .panel h2 {
+            font-size: 21px;
+            margin-bottom: 6px;
+        }
+
+        .description {
+            margin-bottom: 20px;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: minmax(220px, 2fr) minmax(150px, 1fr)
+                minmax(150px, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d5deea;
+            border-radius: 8px;
+            font: inherit;
+            font-size: 14px;
+            outline: none;
+            background: var(--entrada);
+            color: var(--texto);
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--color-principal);
+            box-shadow: 0 0 0 3px rgba(23,105,194,.12);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 8px;
+            padding: 11px 16px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--color-principal);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-principal-hover);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: var(--panel);
+            border: 1px solid var(--borde);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .summary-card span {
+            display: block;
+            color: var(--secundario);
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .summary-card strong {
+            font-size: 25px;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 850px;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--tabla);
+            color: #47627c;
+            padding: 13px;
+            text-align: left;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 13px;
+            border-bottom: 1px solid var(--borde);
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: var(--hover);
+        }
+
+        .estado {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .presente {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .ausente {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .sin-resultados td,
+        .sin-datos td {
+            text-align: center;
+            padding: 35px 15px;
+            color: var(--secundario);
+        }
+
+        .resultado-info {
+            font-size: 13px;
+            color: var(--secundario);
+            margin-bottom: 12px;
+        }
+
+        body.tema-oscuro {
+            --pagina: #111827;
+            --panel: #1f2937;
+            --texto: #f8fafc;
+            --secundario: #cbd5e1;
+            --borde: #374151;
+            --tabla: #273449;
+            --hover: #273449;
+            --entrada: #111827;
+        }
+
+        body.tema-oscuro th {
+            color: #cbd5e1;
+        }
+
+        body.tema-oscuro .btn-secondary {
+            background: #374151;
+            color: #f8fafc;
+        }
+
+        body.modo-compacto .main {
+            padding: 20px;
+        }
+
+        body.modo-compacto .panel {
+            padding: 16px;
+        }
+
+        body.modo-compacto th,
+        body.modo-compacto td {
+            padding: 8px;
+        }
+
+        body.sin-animaciones *,
+        body.sin-animaciones *::before,
+        body.sin-animaciones *::after {
+            animation: none !important;
+            transition: none !important;
+        }
+
+        @media (max-width: 1000px) {
+            .filters {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .filters .field:first-child {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main {
+                margin-left: 220px;
+                width: calc(100% - 220px);
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .app {
+                display: block;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+            }
+
+            .main {
+                margin: 0;
+                width: 100%;
+                padding: 18px;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .filters .field:first-child {
+                grid-column: auto;
+            }
+
+            .system {
+                display: none;
+            }
+        }
+
+        @media print {
+            @page {
+                size: landscape;
+                margin: 12mm;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            .sidebar,
+            .header .system,
+            .filters,
+            .actions,
+            .no-print {
+                display: none !important;
+            }
+
+            .main {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+            }
+
+            .panel,
+            .summary-card {
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: 1px solid #ddd;
+                break-inside: avoid;
+            }
+
+            .summary {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            table {
+                min-width: 0;
+                width: 100%;
+                font-size: 10px;
+            }
+
+            th,
+            td {
+                padding: 6px;
+                color: black !important;
+            }
+
+            th {
+                background: #eaf4fc !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .table-wrap {
+                overflow: visible;
+            }
+
+            tr[style*="display: none"] {
+                display: none !important;
+            }
+        }
+        
+        
+
+
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- MENÚ LATERAL -->
+    <aside class="sidebar">
+        <div class="logo">
+            📚 <span data-nombre-sistema>Asistencia</span>
+        </div>
+
+        <nav class="menu">
+            <a th:href="@{/home}">🏠 <span>Inicio</span></a>
+            <a th:href="@{/asistencia}">📋 <span>Asistencia</span></a>
+            <a th:href="@{/asistencia/agregar}">📝 <span>Agregar asistencia</span></a>
+            <a th:href="@{/padres}">👨‍👩‍👧 <span>Padres</span></a>
+            <a th:href="@{/reuniones}">📅 <span>Reuniones</span></a>
+            <a th:href="@{/usuarios}">👥 <span>Usuarios</span></a>
+            <a th:href="@{/reporte}" class="active">📊 <span>Reportes</span></a>
+            <a th:href="@{/configuracion}">⚙️ <span>Configuración</span></a>
+        </nav>
+
+        <div class="bottom">
+            <div class="active-user">
+                👤 Usuario activo:
+                <strong th:text="${username}">admin</strong>
+            </div>
+
+            <form th:action="@{/logout}" method="post">
+                <button class="logout" type="submit">🚪 Cerrar sesión</button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main">
+
+        <header class="header">
+            <div>
+                <h1>Reportes de asistencia</h1>
+                <p>Consulta, filtra e imprime los registros de asistencia.</p>
+            </div>
+
+            <div class="system">
+                📊 <span data-nombre-sistema>Asistencia</span>
+            </div>
+        </header>
+
+        <section class="summary">
+
+            <div class="summary-card">
+                <span>Total de registros mostrados</span>
+                <strong id="totalRegistros">0</strong>
+            </div>
+
+            <div class="summary-card">
+                <span>Asistencias presentes</span>
+                <strong id="totalPresentes">0</strong>
+            </div>
+
+            <div class="summary-card">
+                <span>Registros ausentes</span>
+                <strong id="totalAusentes">0</strong>
+            </div>
+
+        </section>
+
+        <section class="panel">
+
+            <h2>Consultar reporte</h2>
+            <p class="description">
+                Utiliza los filtros para encontrar los registros que necesitas.
+            </p>
+
+            <!-- FILTROS -->
+            <div class="filters">
+
+                <div class="field">
+                    <label for="buscar">Buscar</label>
+                    <input
+                        type="search"
+                        id="buscar"
+                        placeholder="Nombre, DUI, reunión o fecha..."
+                        autocomplete="off">
+                </div>
+
+                <div class="field">
+                    <label for="filtroEstado">Estado de asistencia</label>
+                    <select id="filtroEstado">
+                        <option value="">Todos los estados</option>
+                        <option value="presente">Presente</option>
+                        <option value="ausente">Ausente</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="filtroFecha">Fecha de reunión</label>
+                    <input type="date" id="filtroFecha">
+                </div>
+
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" type="button"
+                        onclick="window.print()">
+                    🖨️ Imprimir / Guardar PDF
+                </button>
+
+                <button class="btn btn-secondary" type="button"
+                        id="limpiarFiltros">
+                    ↻ Limpiar filtros
+                </button>
+
+                <a class="btn btn-secondary" th:href="@{/asistencia}">
+                    ← Volver a asistencia
+                </a>
+            </div>
+
+            <p class="resultado-info" id="contador">
+                Cargando registros...
+            </p>
+
+            <!-- TABLA DEL REPORTE -->
+            <div class="table-wrap">
+                <table id="tablaReporte">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre del padre</th>
+                            <th>DUI</th>
+                            <th>Fecha</th>
+                            <th>Tipo de reunión</th>
+                            <th>Estado</th>
+                            <th>Hora de llegada</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr th:if="${asistencias == null or asistencias.isEmpty()}"
+                            class="sin-datos">
+                            <td colspan="7">
+                                No hay registros de asistencia para mostrar.
+                            </td>
+                        </tr>
+
+                        <tr th:each="a : ${asistencias}" class="fila-reporte">
+
+                            <td th:text="${a.idAsistencia}">1</td>
+
+                            <td th:text="${a.nombrePadre}">Nombre del padre</td>
+
+                            <td th:text="${a.dui}">00000000-0</td>
+
+                            <td th:text="${a.fechaReunion}">2026-10-21</td>
+
+                            <td th:text="${a.tipoReunion}">Reunión general</td>
+
+                            <td>
+                                <span class="estado"
+                                      th:classappend="${a.estado != null and
+                                      (a.estado.equalsIgnoreCase('Presente') or
+                                      a.estado.equalsIgnoreCase('Asistió') or
+                                      a.estado.equalsIgnoreCase('Asistio') or
+                                      a.estado.equalsIgnoreCase('P'))}
+                                      ? ' presente' : ' ausente'"
+                                      th:text="${a.estado}">
+                                    Presente
+                                </span>
+                            </td>
+
+                            <td th:text="${a.horaLlegada != null ? a.horaLlegada : '-'}">
+                                -
+                            </td>
+
+                        </tr>
+
+                        <tr id="sinResultados" class="sin-resultados"
+                            style="display: none;">
+                            <td colspan="7">
+                                🔎 No se encontraron registros con esos filtros.
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+    </main>
+</div>
+
+<script src="/js/configuracion-global.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const buscar = document.getElementById("buscar");
+        const filtroEstado = document.getElementById("filtroEstado");
+        const filtroFecha = document.getElementById("filtroFecha");
+        const tabla = document.getElementById("tablaReporte");
+        const contador = document.getElementById("contador");
+        const sinResultados = document.getElementById("sinResultados");
+
+        const totalRegistros = document.getElementById("totalRegistros");
+        const totalPresentes = document.getElementById("totalPresentes");
+        const totalAusentes = document.getElementById("totalAusentes");
+
+        const filas = Array.from(
+            tabla.querySelectorAll("tbody tr.fila-reporte")
+        );
+
+        function normalizar(texto) {
+            return (texto || "")
+                .toLocaleLowerCase("es")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .trim();
+        }
+
+        function esPresente(estado) {
+            const valor = normalizar(estado);
+
+            return [
+                "presente",
+                "asistio",
+                "p"
+            ].includes(valor);
+        }
+
+        function obtenerFecha(fila) {
+            const texto = fila.cells[3]?.textContent.trim() || "";
+
+            // Acepta fechas ISO: yyyy-MM-dd.
+            if (/^\d{4}-\d{2}-\d{2}/.test(texto)) {
+                return texto.substring(0, 10);
+            }
+
+            // Acepta fechas mostradas como dd/MM/yyyy.
+            const coincidencia = texto.match(
+                /^(\d{2})\/(\d{2})\/(\d{4})$/
+            );
+
+            if (coincidencia) {
+                return coincidencia[3] + "-" +
+                    coincidencia[2] + "-" + coincidencia[1];
+            }
+
+            return "";
+        }
+
+        function aplicarFiltros() {
+            const termino = normalizar(buscar.value);
+            const estadoSeleccionado = filtroEstado.value;
+            const fechaSeleccionada = filtroFecha.value;
+
+            let visibles = 0;
+            let presentes = 0;
+            let ausentes = 0;
+
+            filas.forEach(function (fila) {
+                const contenido = normalizar(fila.innerText);
+                const estado = normalizar(
+                    fila.cells[5]?.innerText || ""
+                );
+
+                const coincideTexto = contenido.includes(termino);
+
+                const presente = esPresente(estado);
+                const coincideEstado =
+                    estadoSeleccionado === "" ||
+                    (estadoSeleccionado === "presente" && presente) ||
+                    (estadoSeleccionado === "ausente" && !presente);
+
+                const coincideFecha =
+                    fechaSeleccionada === "" ||
+                    obtenerFecha(fila) === fechaSeleccionada;
+
+                const mostrar =
+                    coincideTexto && coincideEstado && coincideFecha;
+
+                fila.style.display = mostrar ? "" : "none";
+
+                if (mostrar) {
+                    visibles++;
+
+                    if (presente) {
+                        presentes++;
+                    } else {
+                        ausentes++;
+                    }
+                }
+            });
+
+            sinResultados.style.display =
+                filas.length > 0 && visibles === 0
+                    ? "table-row"
+                    : "none";
+
+            totalRegistros.textContent = visibles;
+            totalPresentes.textContent = presentes;
+            totalAusentes.textContent = ausentes;
+
+            contador.textContent =
+                visibles + (visibles === 1
+                    ? " registro encontrado"
+                    : " registros encontrados");
+        }
+
+        buscar.addEventListener("input", aplicarFiltros);
+        filtroEstado.addEventListener("change", aplicarFiltros);
+        filtroFecha.addEventListener("change", aplicarFiltros);
+
+        document.getElementById("limpiarFiltros")
+            .addEventListener("click", function () {
+                buscar.value = "";
+                filtroEstado.value = "";
+                filtroFecha.value = "";
+                aplicarFiltros();
+            });
+
+        aplicarFiltros();
+    });
+</script>
+
+</body>
+</html>

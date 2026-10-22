@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -178,6 +177,73 @@
         .btn:hover {
             filter: brightness(.88);
         }
+
+        
+        
+/* BARRA DE BÚSQUEDA */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    max-width: 500px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 15px 12px 42px;
+    border: 1px solid #d5deea;
+    border-radius: 9px;
+    outline: none;
+    font-size: 14px;
+    background: #fff;
+    color: #172033;
+    transition: .2s;
+}
+
+.search-box input:focus {
+    border-color: var(--color-principal);
+    box-shadow: 0 0 0 3px rgba(23, 105, 194, .12);
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+}
+
+.search-count {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.no-results {
+    display: none;
+    text-align: center;
+    padding: 35px 15px;
+    color: #64748b;
+}
+
+@media (max-width: 550px) {
+    .search-container {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .search-box {
+        max-width: 100%;
+    }
+}
+
 
         /* TABLA */
         .table-wrap {
@@ -381,6 +447,7 @@
             <a th:href="@{/padres}" class="active">👨‍👩‍👧 <span>Padres</span></a>
             <a th:href="@{/reuniones}">📅 <span>Reuniones</span></a>
             <a th:href="@{/usuarios}">👥 <span>Usuarios</span></a>
+            <a th:href="@{/reporte}">📊<span>Reportes</span></a>
             <a th:href="@{/configuracion}">⚙️ <span>Configuración</span></a>
         </nav>
 
@@ -429,8 +496,22 @@
                 </a>
             </div>
 
-            <div class="table-wrap">
-                <table>
+            <div class="search-container">
+    <div class="search-box">
+        <span class="search-icon">🔎</span>
+        <input
+            type="search"
+            id="buscarPadre"
+            placeholder="Buscar por nombre, DUI, teléfono, estudiante..."
+            aria-label="Buscar padres registrados"
+            autocomplete="off">
+    </div>
+
+    <span class="search-count" id="contadorPadres"></span>
+</div>
+
+<div class="table-wrap">
+    <table id="tablaPadres">
                     <thead>
                     <tr>
                         <th>ID</th>
@@ -478,6 +559,13 @@
                             </div>
                         </td>
                     </tr>
+                    
+                    <CodeBlock language="html" editable>
+<tr id="sinResultados" style="display: none;">
+    <td colspan="7" class="no-results" style="display: table-cell;">
+        🔎 No se encontraron padres que coincidan con la búsqueda.
+    </td>
+</tr>
                     </tbody>
                 </table>
             </div>

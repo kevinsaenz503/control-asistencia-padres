@@ -198,6 +198,172 @@ const AsistenciaConfig = {
     }
 };
 
+
+document.addEventListener("DOMContentLoaded", function () {
+    const buscador = document.getElementById("buscarPadre");
+    const tabla = document.getElementById("tablaPadres");
+    const contador = document.getElementById("contadorPadres");
+    const sinResultados = document.getElementById("sinResultados");
+
+    if (!buscador || !tabla || !contador || !sinResultados) {
+        return;
+    }
+
+    const filas = Array.from(
+        tabla.querySelectorAll("tbody tr")
+    ).filter(fila =>
+        fila.hasAttribute("th:each") ||
+        fila.querySelector("a.small-btn.edit")
+    );
+
+    function normalizar(texto) {
+        return texto
+            .toLocaleLowerCase("es")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
+    }
+
+    function buscarPadres() {
+        const termino = normalizar(buscador.value);
+        let visibles = 0;
+
+        filas.forEach(fila => {
+            const contenido = normalizar(fila.innerText);
+            const coincide = contenido.includes(termino);
+
+            fila.style.display = coincide ? "" : "none";
+
+            if (coincide) {
+                visibles++;
+            }
+        });
+
+        sinResultados.style.display =
+            visibles === 0 ? "table-row" : "none";
+
+        contador.textContent =
+            visibles + (visibles === 1
+                ? " padre encontrado"
+                : " padres encontrados");
+    }
+
+    buscador.addEventListener("input", buscarPadres);
+    buscarPadres();
+});
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const buscador = document.getElementById("buscarAsistencia");
+    const tabla = document.querySelector(".table-wrap table");
+    const contador = document.getElementById("contadorAsistencia");
+    const sinResultados = document.getElementById("sinResultadosAsistencia");
+
+    if (!buscador || !tabla || !contador || !sinResultados) {
+        return;
+    }
+
+    const filas = Array.from(tabla.querySelectorAll("tbody tr"))
+        .filter(fila => fila.hasAttribute("th:each") ||
+                        fila.querySelector("a.small-btn.edit"));
+
+    function normalizar(texto) {
+        return texto
+            .toLocaleLowerCase("es")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
+    }
+
+    function buscarAsistencias() {
+        const termino = normalizar(buscador.value);
+        let visibles = 0;
+
+        filas.forEach(function (fila) {
+            const contenido = normalizar(fila.innerText);
+            const coincide = contenido.includes(termino);
+
+            fila.style.display = coincide ? "" : "none";
+
+            if (coincide) {
+                visibles++;
+            }
+        });
+
+        sinResultados.style.display =
+            visibles === 0 ? "table-row" : "none";
+
+        contador.textContent =
+            visibles + (visibles === 1
+                ? " registro encontrado"
+                : " registros encontrados");
+    }
+
+    buscador.addEventListener("input", buscarAsistencias);
+    buscarAsistencias();
+});
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const buscador = document.getElementById("buscarReunion");
+    const tabla = document.getElementById("tablaReuniones");
+    const contador = document.getElementById("contadorReuniones");
+    const sinResultados = document.getElementById("sinResultadosReuniones");
+
+    if (!buscador || !tabla || !contador || !sinResultados) {
+        return;
+    }
+
+    const filas = Array.from(tabla.querySelectorAll("tbody tr"))
+        .filter(fila =>
+            fila.hasAttribute("th:each") ||
+            fila.querySelector("a.small-btn.edit")
+        );
+
+    function normalizar(texto) {
+        return texto
+            .toLocaleLowerCase("es")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
+    }
+
+    function buscarReuniones() {
+        const termino = normalizar(buscador.value);
+        let visibles = 0;
+
+        filas.forEach(function (fila) {
+            const contenido = normalizar(fila.innerText);
+            const coincide = contenido.includes(termino);
+
+            fila.style.display = coincide ? "" : "none";
+
+            if (coincide) {
+                visibles++;
+            }
+        });
+
+        sinResultados.style.display =
+            visibles === 0 ? "table-row" : "none";
+
+        contador.textContent =
+            visibles + (
+                visibles === 1
+                    ? " reunión encontrada"
+                    : " reuniones encontradas"
+            );
+    }
+
+    buscador.addEventListener("input", buscarReuniones);
+    buscarReuniones();
+});
+
+
+
 /* Aplicar los ajustes al cargar la página */
 document.addEventListener("DOMContentLoaded", function () {
     AsistenciaConfig.aplicar();

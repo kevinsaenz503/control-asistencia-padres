@@ -175,6 +175,42 @@ public class LoginWebController {
         catch(Exception ex){ ex.printStackTrace(); model.addAttribute("asistencias",List.of()); model.addAttribute("error","No se pudieron cargar las asistencias."); }
         return "asistencia";
     }
+    
+    
+    // ==================== REPORTES ====================
+    @GetMapping("/reporte")
+    public String reporte(Model model, HttpSession session) {
+
+        User user = getUser(session);
+
+        // Verificar que el usuario haya iniciado sesión.
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("username", user.getUsername());
+
+        try {
+            // Cargar los registros reales desde PostgreSQL.
+            model.addAttribute(
+                    "asistencias",
+                    asistenciaRepository.findAll()
+            );
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            model.addAttribute("asistencias", List.of());
+
+            model.addAttribute(
+                    "error",
+                    "No se pudieron cargar los registros del reporte."
+            );
+        }
+
+        return "reporte";
+    }
+    
 
     @GetMapping("/asistencia/agregar")
     public String mostrarFormularioAsistencia(Model model,HttpSession session){
